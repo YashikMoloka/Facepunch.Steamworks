@@ -134,6 +134,7 @@ namespace Steamworks.Data
 		public int CompareTo( HSteamUser other ) => Value.CompareTo( other.Value );
 	}
 	
+	// unsupported type SteamErrMsg
 	internal struct FriendsGroupID_t : IEquatable<FriendsGroupID_t>, IComparable<FriendsGroupID_t>
 	{
 		// Name: FriendsGroupID_t, Type: short

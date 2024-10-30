@@ -87,6 +87,7 @@ namespace Generator
 
             foreach ( var iface in def.Interfaces )
             {
+	            Console.WriteLine($"Processing interface: {iface.Name}...");
                 GenerateInterface( iface, $"{folder}../Generated/Interfaces/" );
             }
 		}

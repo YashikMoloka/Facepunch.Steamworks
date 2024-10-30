@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 
 internal class FetchStringType : BaseType
 {
+	public string OutStringCount;
 	public override string TypeName => $"string";
 	public override string AsArgument() => $"out string {VarName}";
 

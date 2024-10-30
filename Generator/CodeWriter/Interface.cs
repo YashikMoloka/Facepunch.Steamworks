@@ -44,7 +44,7 @@ namespace Generator
 							{
 								WriteLine( $"public override IntPtr GetUserInterfacePointer() => {func.Name_Flat}();" );
 							}
-							else  if ( func.Kind == "gameserver" )
+							else if ( func.Kind == "gameserver" )
 							{
 								WriteLine( $"public override IntPtr GetServerInterfacePointer() => {func.Name_Flat}();" );
 							}
@@ -70,7 +70,6 @@ namespace Generator
 						WriteFunction( iface, func );
 						WriteLine();
 					}
-
 				}
 				EndBlock();
 			}
@@ -89,42 +88,55 @@ namespace Generator
 
 			var args = func.Params.Select( x =>
 			{
-				var bt = BaseType.Parse( x.ParamType, x.ParamName );
+				var bt = BaseType.Parse( x.ParamType, x.ParamName, outStringCount: x.OutStringCount );
 				bt.Func = func.Name;
 				return bt;
 			} ).ToArray();
 
-			for( int i=0; i<args.Length; i++ )
+			for ( int i = 0; i < args.Length; i++ )
 			{
-				if ( args[i] is FetchStringType )
+				if ( args[i] is FetchStringType fetchStringType )
 				{
 					if ( args[i + 1] is IntType || args[i + 1] is UIntType || args[i + 1] is UIntPtrType )
 					{
-						if ( string.IsNullOrEmpty(  args[i + 1].Ref ) )
+						if ( string.IsNullOrEmpty( args[i + 1].Ref ) )
 						{
 							args[i + 1] = new LiteralType( args[i + 1], "(1024 * 32)" );
 						}
+					} else if ( fetchStringType.OutStringCount != null )
+					{
+						for ( var j = 0; j < args.Length; j++ )
+						{
+							if ( args[j].VarName != fetchStringType.OutStringCount ) continue;
+
+							if ( string.IsNullOrEmpty( args[j].Ref ) )
+							{
+								args[j] = new LiteralType( args[j], "(1024 * 32)" );
+							}
+						}
+						continue;
 					}
 					else
 					{
-						throw new System.Exception( $"String Builder Next Type Is {args[i+1].GetType()}" );
+						throw new System.Exception( $"String Builder Next Type Is {args[i + 1].GetType()}" );
 					}
 				}
 			}
 
-			var argstr = string.Join( ", ", args.Where( x => !x.ShouldSkipAsArgument ).Select( x => x.AsArgument() ) ); ;
+			var argstr = string.Join( ", ", args.Where( x => !x.ShouldSkipAsArgument ).Select( x => x.AsArgument() ) );
+			;
 			var delegateargstr = string.Join( ", ", args.Select( x => x.AsNativeArgument() ) );
 
 			if ( returnType is SteamApiCallType sap )
 			{
 				sap.CallResult = func.CallResult;
-				argstr = string.Join( ", ", args.Select( x => x.AsArgument().Replace( "ref ", " /* ref */ " )  ) );
+				argstr = string.Join( ", ", args.Select( x => x.AsArgument().Replace( "ref ", " /* ref */ " ) ) );
 			}
 
 			WriteLine( $"#region FunctionMeta" );
 
 			WriteLine( $"[DllImport( Platform.LibraryName, EntryPoint = \"{func.FlatName}\", CallingConvention = Platform.CC)]" );
-			
+
 			if ( returnType.ReturnAttribute != null )
 				WriteLine( returnType.ReturnAttribute );
 

@@ -22,6 +22,7 @@ namespace Generator
                 if ( val.EndsWith( "ull" ) )
                     val = val.Replace( "ull", "" );
 
+                val = val.Replace( ".f", ".0f" );
                 val = val.Replace( "uint32", "uint" );
                 val = val.Replace( "16U", "16" );
                 val = val.Replace( "8U", "8" );
